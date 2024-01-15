@@ -1,0 +1,9 @@
+lxml
+pymongo
+requests
+boto3
+botocore
+awscli
+langchain
+langchain_community
+utils
