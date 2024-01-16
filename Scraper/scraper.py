@@ -10,27 +10,72 @@ import PyPDF2
 url = 'mongodb+srv://<username>:<password>@cluster0.bjpsr.mongodb.net/?retryWrites=true&w=majority'
 mongoClient = pymongo.MongoClient(url)
 db = mongoClient['hackathon']
-collection = db['hackathon_rag']
+collection = db['100_chunks']
 
 bedrock_client = boto3.client(service_name="bedrock-runtime", region_name="us-east-1")
 
-pdf_path = 'genai-principles.pdf'
 
-def extract_text_from_pdf(pdf_path):
+def extract_context():
     text = ""
 
-    # Open the PDF file
-    with open(pdf_path, 'rb') as file:
-        reader = PyPDF2.PdfReader(file)
+    page = requests.get('https://www.mongodb.com/docs/atlas/atlas-search/create-index/')
+    tree = html.fromstring(page.content)
 
-        # Iterate over each page and extract text
-        for page_num in range(len(reader.pages)):
-            page = reader.pages[page_num]
-            text += page.extract_text()
+    content = tree.xpath('//p[@class="leafygreen-ui-kkpb6g"]/text()')
 
-    text = text.replace('\n', ' ').replace('\r', '')
-    return text
+    separator = ' '
+    text1 = separator.join(content)
 
+    page = requests.get('https://www.mongodb.com/docs/atlas/atlas-vector-search/vector-search-overview/')
+    tree = html.fromstring(page.content)
+
+    content = tree.xpath('//p[@class="leafygreen-ui-kkpb6g"]/text()')
+
+    separator = ' '
+    text2 = separator.join(content)
+
+    page = requests.get('https://www.mongodb.com/docs/atlas/atlas-vector-search/vector-search-type/')
+    tree = html.fromstring(page.content)
+
+    content = tree.xpath('//p[@class="leafygreen-ui-kkpb6g"]/text()')
+
+    separator = ' '
+    text3 = separator.join(content)
+
+    page = requests.get('https://www.mongodb.com/docs/atlas/atlas-vector-search/delete-index/')
+    tree = html.fromstring(page.content)
+
+    content = tree.xpath('//p[@class="leafygreen-ui-kkpb6g"]/text()')
+
+    separator = ' '
+    text4 = separator.join(content)
+
+    page = requests.get('https://www.mongodb.com/docs/atlas/atlas-vector-search/view-index/')
+    tree = html.fromstring(page.content)
+
+    content = tree.xpath('//p[@class="leafygreen-ui-kkpb6g"]/text()')
+
+    separator = ' '
+    text5 = separator.join(content)
+
+    page = requests.get('https://www.mongodb.com/docs/atlas/atlas-vector-search/edit-index/')
+    tree = html.fromstring(page.content)
+
+    content = tree.xpath('//p[@class="leafygreen-ui-kkpb6g"]/text()')
+
+    separator = ' '
+    text6 = separator.join(content)
+
+
+    page = requests.get('https://www.mongodb.com/docs/atlas/atlas-vector-search/changelog/')
+    tree = html.fromstring(page.content)
+
+    content = tree.xpath('//p[@class="leafygreen-ui-kkpb6g"]/text()')
+
+    separator = ' '
+    text7 = separator.join(content)
+
+    return text1 + ' ' + text2 + ' ' + text3 + ' ' + text4 + ' ' + text5 + ' ' + text6 + ' ' + text7
 
 def process_chunks(chunk_size, chunk_overlap, text, model_id="amazon.titan-embed-text-v1"):
 
@@ -64,7 +109,7 @@ def ask_question(question, model_id):
             "queryVector": embedding,
             "path": "embeddings",
             "numCandidates": 10,
-            "index": "rag",
+            "index": "vector_index",
             "limit": 1
             }
         },
@@ -81,10 +126,10 @@ def ask_question(question, model_id):
 
 def main():
     
-    extracted_text = extract_text_from_pdf(pdf_path)
+    extracted_text = extract_context()
 
-    process_chunks(500, 50, extracted_text, model_id="amazon.titan-embed-text-v1")
+    process_chunks(1000, 100, extracted_text, model_id="amazon.titan-embed-text-v1")
 
 main()
     
-ask_question("What are large language models used for?", model_id="amazon.titan-embed-text-v1")
+ask_question("Can you delete Atlas Search indexes?", model_id="amazon.titan-embed-text-v1")
