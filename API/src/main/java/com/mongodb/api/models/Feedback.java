@@ -41,7 +41,7 @@ public class Feedback {
         return chunkSize;
     }
 
-    public void setChunkSize(String id) {
+    public void setChunkSize(int chunkSize) {
         this.chunkSize = chunkSize;
     }
 
