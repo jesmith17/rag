@@ -12,6 +12,8 @@ public class Feedback {
     private String answer;
     private String llmInput;
 
+    private int chunkSize;
+
     private boolean thumbsUp;
     private String feedback;
 
@@ -33,6 +35,14 @@ public class Feedback {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public int getchunkSize() {
+        return chunkSize;
+    }
+
+    public void setChunkSize(String id) {
+        this.chunkSize = chunkSize;
     }
 
     public String getPrompt() {
