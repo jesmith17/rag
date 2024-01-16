@@ -1,0 +1,6 @@
+https://www.mongodb.com/docs/atlas/atlas-search/create-index
+https://www.mongodb.com/docs/atlas/atlas-vector-search/vector-search-overview/
+https://www.mongodb.com/docs/atlas/atlas-vector-search/vector-search-type/
+https://www.mongodb.com/docs/atlas/atlas-vector-search/delete-index/
+https://www.mongodb.com/docs/atlas/atlas-vector-search/view-index/
+https://www.mongodb.com/docs/atlas/atlas-vector-search/edit-index/

@@ -10,76 +10,12 @@ import PyPDF2
 url = 'mongodb+srv://<username>:<password>@cluster0.bjpsr.mongodb.net/?retryWrites=true&w=majority'
 mongoClient = pymongo.MongoClient(url)
 db = mongoClient['hackathon']
-collection = db['100_chunks']
+collection = db['1000_chunks']
 
 bedrock_client = boto3.client(service_name="bedrock-runtime", region_name="us-east-1")
 
 
-def extract_context():
-    text = ""
-
-    page = requests.get('https://www.mongodb.com/docs/atlas/atlas-search/create-index/')
-    tree = html.fromstring(page.content)
-
-    content = tree.xpath('//p[@class="leafygreen-ui-kkpb6g"]/text()')
-
-    separator = ' '
-    text1 = separator.join(content)
-
-    page = requests.get('https://www.mongodb.com/docs/atlas/atlas-vector-search/vector-search-overview/')
-    tree = html.fromstring(page.content)
-
-    content = tree.xpath('//p[@class="leafygreen-ui-kkpb6g"]/text()')
-
-    separator = ' '
-    text2 = separator.join(content)
-
-    page = requests.get('https://www.mongodb.com/docs/atlas/atlas-vector-search/vector-search-type/')
-    tree = html.fromstring(page.content)
-
-    content = tree.xpath('//p[@class="leafygreen-ui-kkpb6g"]/text()')
-
-    separator = ' '
-    text3 = separator.join(content)
-
-    page = requests.get('https://www.mongodb.com/docs/atlas/atlas-vector-search/delete-index/')
-    tree = html.fromstring(page.content)
-
-    content = tree.xpath('//p[@class="leafygreen-ui-kkpb6g"]/text()')
-
-    separator = ' '
-    text4 = separator.join(content)
-
-    page = requests.get('https://www.mongodb.com/docs/atlas/atlas-vector-search/view-index/')
-    tree = html.fromstring(page.content)
-
-    content = tree.xpath('//p[@class="leafygreen-ui-kkpb6g"]/text()')
-
-    separator = ' '
-    text5 = separator.join(content)
-
-    page = requests.get('https://www.mongodb.com/docs/atlas/atlas-vector-search/edit-index/')
-    tree = html.fromstring(page.content)
-
-    content = tree.xpath('//p[@class="leafygreen-ui-kkpb6g"]/text()')
-
-    separator = ' '
-    text6 = separator.join(content)
-
-
-    page = requests.get('https://www.mongodb.com/docs/atlas/atlas-vector-search/changelog/')
-    tree = html.fromstring(page.content)
-
-    content = tree.xpath('//p[@class="leafygreen-ui-kkpb6g"]/text()')
-
-    separator = ' '
-    text7 = separator.join(content)
-
-    return text1 + ' ' + text2 + ' ' + text3 + ' ' + text4 + ' ' + text5 + ' ' + text6 + ' ' + text7
-
 def process_chunks(chunk_size, chunk_overlap, text, model_id="amazon.titan-embed-text-v1"):
-
-    collection.delete_many({})
 
     bedrock_embeddings = BedrockEmbeddings(model_id=model_id, client=bedrock_client)
 
@@ -96,6 +32,33 @@ def process_chunks(chunk_size, chunk_overlap, text, model_id="amazon.titan-embed
             "embeddings": embedding
         }
         collection.insert_one(payload)
+
+
+def process_pages():
+    text = ""
+
+    collection.delete_many({})
+
+    file1 = open('docs.txt', 'r')
+    lines = file1.readlines()
+ 
+    count = 0
+
+    for line in lines:
+        count += 1
+        print("Line{}: {}".format(count, line.strip()))
+        url = str(line.strip())
+        page = requests.get(url)
+        tree = html.fromstring(page.content)
+
+        content = tree.xpath('//p[@class="leafygreen-ui-kkpb6g"]/text()')
+        separator = ' '
+        text = separator.join(content)
+
+        process_chunks(1000, 100, text, model_id="amazon.titan-embed-text-v1")
+
+    return text
+
 
 
 def ask_question(question, model_id):
@@ -126,10 +89,8 @@ def ask_question(question, model_id):
 
 def main():
     
-    extracted_text = extract_context()
+    process_pages()
 
-    process_chunks(1000, 100, extracted_text, model_id="amazon.titan-embed-text-v1")
-
-main()
+#main()
     
 ask_question("Can you delete Atlas Search indexes?", model_id="amazon.titan-embed-text-v1")
