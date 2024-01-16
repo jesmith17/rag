@@ -6,10 +6,15 @@ from langchain_community.embeddings.bedrock import BedrockEmbeddings
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 import PyPDF2
 
+CHUNKS = 1000
+OVERLAP = 100
+
 
 url = 'mongodb+srv://<username>:<password>@cluster0.bjpsr.mongodb.net/?retryWrites=true&w=majority'
 mongoClient = pymongo.MongoClient(url)
 db = mongoClient['hackathon']
+cname = str(CHUNKS) + "_chunks"
+print(cname)
 collection = db['1000_chunks']
 
 bedrock_client = boto3.client(service_name="bedrock-runtime", region_name="us-east-1")
@@ -55,7 +60,7 @@ def process_pages():
         separator = ' '
         text = separator.join(content)
 
-        process_chunks(1000, 100, text, model_id="amazon.titan-embed-text-v1")
+        process_chunks(CHUNKS, OVERLAP, text, model_id="amazon.titan-embed-text-v1")
 
     return text
 
@@ -91,6 +96,6 @@ def main():
     
     process_pages()
 
-#main()
+main()
     
 ask_question("Can you delete Atlas Search indexes?", model_id="amazon.titan-embed-text-v1")
