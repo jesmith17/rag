@@ -71,7 +71,6 @@ public class TitanService {
     public ChatResponse generateResponse(String prompt, int chunkSize) {
 
 
-
         // Generate embeddings for prompt
         double[] embeddingsArray = this.generateEmbeddings(prompt);
 
@@ -88,18 +87,18 @@ public class TitanService {
         StringBuilder builder = new StringBuilder();
 
         for(Chunk chunk: contextEntries) {
-            builder.append(chunk.getText());
+            if ((builder.length() + chunk.getText().length()) <= 3900) {
+                builder.append(chunk.getText());
+            }
         }
 
         // Always have these 2, the ones above are for the context found in the DB lookup
-        builder.append("Based on the above context");
-        builder.append(prompt);
+        builder.append(" \nBased on the above context");
+        builder.append("\n" + prompt);
 
-        String llmInput = builder.toString();
-        if (llmInput.length() > 4000) {
-            llmInput = llmInput.substring(llmInput.length() - 3999);
-        }
 
+
+        System.out.println(builder.toString());
 
         JSONObject configObject = new JSONObject()
                 .put("maxTokenCount", 4096)
@@ -108,7 +107,7 @@ public class TitanService {
                 .put("topP", 1);
 
         JSONObject jsonBody = new JSONObject()
-                .put("inputText", llmInput)
+                .put("inputText", builder.toString())
                 .put("textGenerationConfig", configObject);
 
 
@@ -133,6 +132,7 @@ public class TitanService {
         ChatResponse chatResponse = new ChatResponse();
         chatResponse.setAnswer(completion);
         chatResponse.setPrompt(prompt);
+        chatResponse.setLlmInput(builder.toString());
 
         return chatResponse;
         

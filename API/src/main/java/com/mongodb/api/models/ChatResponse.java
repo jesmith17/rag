@@ -5,6 +5,8 @@ public class ChatResponse {
     public String prompt;
     public String answer;
 
+    public String llmInput;
+
 
     public String getPrompt() {
         return prompt;
@@ -20,5 +22,13 @@ public class ChatResponse {
 
     public void setAnswer(String answer) {
         this.answer = answer;
+    }
+
+    public String getLlmInput() {
+        return llmInput;
+    }
+
+    public void setLlmInput(String llmInput) {
+        this.llmInput = llmInput;
     }
 }

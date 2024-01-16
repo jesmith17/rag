@@ -1,5 +1,6 @@
 package com.mongodb.api.controllers;
 
+import com.mongodb.api.models.ChatRequest;
 import com.mongodb.api.models.ChatResponse;
 import com.mongodb.api.services.StabilityService;
 import com.mongodb.api.services.TitanService;
@@ -20,10 +21,10 @@ public class TextController {
 
 
     @PostMapping
-    private ChatResponse getText(@RequestBody Map<String, String> body){
-        String prompt = body.get("prompt");
-        Integer chunkSize = Integer.parseInt(body.get("chunkSize"));
-        return service.generateResponse(prompt, chunkSize);
+    private ChatResponse getText(@RequestBody ChatRequest request){
+
+
+        return service.generateResponse(request.getPrompt(), request.getChunkSize());
     }
 
 }
