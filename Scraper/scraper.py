@@ -15,7 +15,7 @@ mongoClient = pymongo.MongoClient(url)
 db = mongoClient['hackathon']
 cname = str(CHUNKS) + "_chunks"
 print(cname)
-collection = db['1000_chunks']
+collection = db[cname]
 
 bedrock_client = boto3.client(service_name="bedrock-runtime", region_name="us-east-1")
 
