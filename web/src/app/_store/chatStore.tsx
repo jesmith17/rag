@@ -14,6 +14,7 @@ type ChatState = {
     sendMessage: (message:chatApiParams) => void
     acknowledgeMessage: () => void
     changeSetting: (settings:RAGSettings) => void
+    clearMessages: () => void
 }
 
 type ChatMessage = {
@@ -123,6 +124,11 @@ export const useChatStore = create<ChatState>((set) => ({
     changeSetting: (settings:RAGSettings) => {
         set((state) => ({
             settings: settings
+        }))
+    },
+    clearMessages: () => {
+        set((state) => ({
+            messages: []
         }))
     }
 }))

@@ -10,7 +10,7 @@ import 'react-toastify/dist/ReactToastify.css';
 
 export default function Home() {
 
-  const { messages, processing, addMessage, sendMessage, settings, changeSetting } = useChatStore()
+  const { messages, processing, addMessage, sendMessage, settings, changeSetting, clearMessages } = useChatStore()
 
   const [draftMessage, setDraftMessage] = useState("")
 
@@ -75,6 +75,7 @@ export default function Home() {
           src="/mongo-spring-green.png" 
         />
         <div className="lg:px-2 self-end text-spring-green">RAG Optimizer</div>
+
       </div>
       <div className="min-h-full flex-1 self-start flex flex-col justify-between w-full  p-2 items-center  p-2 rounded-md   rounded-md ">
             <div id="chat" className="w-full pb-4">
@@ -100,6 +101,18 @@ export default function Home() {
 
 
         </div>
+        {messages.length == 0 &&
+          <div className="text-spring-green self-end flex flex-col gap-y-16 p-16 text-center w-full text-xl">
+                <h2 className="text-4xl font-bold">Welcome to the Rag Optimizer</h2>
+                <div className="flex flex-col gap-y-4">
+                <span>Anyone can build RAG Applications! </span>
+                
+                <span>The bigger challenge is to generate the best vector embeddings to achieve accuracy of the RAG architecture. </span>
+                <span>RAG Optimizer is a framework that allows developers to optimize the chunking strategy.</span> 
+                </div>
+
+            </div>
+        }
         {isShown &&
           <div className="text-spring-green w-full bg-evergreen flex flex-row justify-between p-4">
             <div className="flex flex-col h-11 w-full px-3">
@@ -124,21 +137,18 @@ export default function Home() {
             </div>
           </div>
         }
-        {messages.length == 0 &&
-          <div className="text-spring-green self-end flex flex-col gap-y-16 p-16 text-center w-full text-xl">
-                <h2 className="text-4xl font-bold">Welcome to the Rag Optimizer</h2>
-                <div className="flex flex-col gap-y-4">
-                <span>Anyone can build RAG Applications! </span>
-                
-                <span>The bigger challenge is to generate the best vector embeddings to achieve accuracy of the RAG architecture. </span>
-                <span>RAG Optimizer is a framework that allows developers to optimize the chunking strategy.</span> 
-                </div>
 
-            </div>
-        }
         <form className="flex flex-row w-full p-2 self-end" onSubmit={handleChat}>
-            <div className="rounded-full border border-spring-green p-1  px-4 text-left placeholder-spring-green text-slate-blue w-full">
+            <button  onClick={() => clearMessages()} className=" relative h-8 w-8 hover:bg-evergreen rounded-lg text-spring-green" type="button">
+              <Image
+                className="rounded-full"
+                src="/clear.svg" 
+                alt={'clear'}
+                fill={true}
 
+              />
+            </button>
+            <div className="rounded-full border border-spring-green p-1  px-4 text-left placeholder-spring-green text-slate-blue w-full">
                 <input 
                   type="text"
                   disabled={processing}
