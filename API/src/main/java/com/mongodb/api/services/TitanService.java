@@ -3,11 +3,13 @@ package com.mongodb.api.services;
 
 import com.mongodb.api.models.ChatResponse;
 import com.mongodb.api.models.Chunk;
-import com.mongodb.api.repository.HundredEmbeddingsRepository;
-import com.mongodb.api.repository.ThousandEmbeddingsRepository;
+import org.bson.*;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.aggregation.Aggregation;
+import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.core.SdkBytes;
 import software.amazon.awssdk.regions.Region;
@@ -19,15 +21,16 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.springframework.data.mongodb.core.aggregation.Aggregation.newAggregation;
+import static org.springframework.data.mongodb.core.aggregation.Aggregation.stage;
+
 @Service
 public class TitanService {
 
     private BedrockRuntimeClient runtime;
 
     @Autowired
-    private ThousandEmbeddingsRepository thousandRepository;
-    @Autowired
-    private HundredEmbeddingsRepository hundredRepository;
+    private MongoTemplate template;
 
     public TitanService(){
         runtime = BedrockRuntimeClient.builder()
@@ -77,9 +80,9 @@ public class TitanService {
         List<Chunk> contextEntries = new ArrayList<>();
         // Lookup context in Mongo based on vector search
         if (chunkSize == 1000) {
-            contextEntries = thousandRepository.vectorSearch(embeddingsArray);
+            contextEntries = this.vectorQuery(embeddingsArray, "1000_chunks");
         } else if (chunkSize == 100) {
-            contextEntries = hundredRepository.vectorSearch(embeddingsArray);
+            contextEntries = this.vectorQuery(embeddingsArray, "100_chunks");
         }
 
 
@@ -93,8 +96,8 @@ public class TitanService {
         }
 
         // Always have these 2, the ones above are for the context found in the DB lookup
-        builder.append(" \nBased on the above context");
-        builder.append("\n" + prompt);
+        builder.append(" \nBased on the above context, ");
+        builder.append(prompt);
 
 
 
@@ -140,8 +143,28 @@ public class TitanService {
     }
 
 
-    private List<Chunk> vectorQuery(double [] embeddings) {
-        return null;
+    private List<Chunk> vectorQuery(double[] embeddings, String collectionName) {
+        BsonDocument searchQuery = new BsonDocument();
+        BsonArray embeddingsArray = new BsonArray();
+        for(double vector: embeddings){
+            embeddingsArray.add(new BsonDouble(vector));
+        }
+        searchQuery.append("queryVector", embeddingsArray);
+        searchQuery.append("path",new BsonString("embeddings"));
+        searchQuery.append("numCandidates", new BsonInt32(200));
+        searchQuery.append("index", new BsonString("vector_index"));
+        searchQuery.append("limit", new BsonInt32(10));
+
+
+        Aggregation agg = newAggregation(
+             stage(new BsonDocument().append("$vectorSearch", searchQuery))
+        );
+
+        AggregationResults<Chunk> aggResult = template.aggregate(agg,collectionName, Chunk.class);
+        List<Chunk> results = aggResult.getMappedResults();
+
+
+        return results;
     }
 
 
