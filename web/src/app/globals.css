@@ -8,6 +8,15 @@
   --background-end-rgb: 0, 104, 74; */
 }
 
+#chat {
+  overflow-anchor: none;
+}
+
+#chat-anchor {
+  overflow-anchor: auto;
+  height: 1px;
+
+}
 @media (prefers-color-scheme: dark) {
   :root {
     --foreground-rgb: 255, 255, 255;

@@ -3,7 +3,13 @@
 
 ![](https://webimages.mongodb.com/_com_assets/cms/kuyjf3vea2hg34taa-horizontal_default_slate_blue.svg?auto=format%252Ccompress)
 
-## Run the App
+###  Run the App
 ```shell
+npm install
 npm run dev
 ```
+
+
+### Loading the App
+
+Navigate to http://localhost:3000/
