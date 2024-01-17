@@ -152,6 +152,19 @@ public class TitanService {
                 collectionName = "100_chunks";
         }
 
+        String indexName = "vector_index";
+        switch (chatRequest.getSimilarity()){
+            case "euclidean":
+                indexName = "vector_index_euclidean";
+                break;
+            case "dotproduct":
+                indexName = "vector_index_dotproduct";
+                break;
+            default:
+                indexName = "vector_index";
+                break;
+        }
+
         BsonDocument searchQuery = new BsonDocument();
         BsonArray embeddingsArray = new BsonArray();
         for(double vector: embeddings){
@@ -160,7 +173,7 @@ public class TitanService {
         searchQuery.append("queryVector", embeddingsArray);
         searchQuery.append("path",new BsonString("embeddings"));
         searchQuery.append("numCandidates", new BsonInt32(chatRequest.getNumCandidates()));
-        searchQuery.append("index", new BsonString("vector_index"));
+        searchQuery.append("index", new BsonString(indexName));
         searchQuery.append("limit", new BsonInt32(chatRequest.getLimit()));
 
 

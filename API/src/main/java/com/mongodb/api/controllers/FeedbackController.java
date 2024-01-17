@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Optional;
 
 @RestController
+@CrossOrigin(origins = {"http://localhost:4200", "**"}, maxAge = 3600)
 @RequestMapping(value="feedback", consumes = "*/*", produces = MediaType.APPLICATION_JSON_VALUE)
 public class FeedbackController {
 
