@@ -4,8 +4,9 @@ import Image from 'next/image'
 import ChatBubble from './_components/ChatBubble'
 import { useChatStore } from './_store/chatStore'
 import { useSettingStore} from './_store/settingStore'
-
+import { ToastContainer, toast } from 'react-toastify';
 import {  useState } from 'react'
+import 'react-toastify/dist/ReactToastify.css';
 
 export default function Home() {
 
@@ -72,7 +73,7 @@ export default function Home() {
           className="w-64"
           src="/mongo-spring-green.png" 
         />
-        <div className="lg:px-2 self-end text-spring-green">North Hackathon</div>
+        <div className="lg:px-2 self-end text-spring-green">RAG Optimizer</div>
       </div>
       <div className="min-h-full flex-1 self-start flex flex-col justify-between w-full  p-2 items-center  p-2 rounded-md   rounded-md ">
             <div id="chat" className="w-full pb-4">
@@ -81,6 +82,7 @@ export default function Home() {
                       messages.map((message, index )=> {
                         return (
                           <ChatBubble
+                            feedbackId={message.feedbackId}
                             content={message.content}
                             reverse={message.reverse}
                             key={`message-${index}`}
@@ -133,7 +135,7 @@ export default function Home() {
                   onChange={e => setDraftMessage(e.target.value)}x
                 />
             </div>
-            <button type="button" onClick={handleSettingChange} className="relative h-8 w-8 hover:bg-gray-100 rounded-lg">
+            <button type="button" onClick={handleSettingChange} className="relative h-8 w-8 hover:bg-evergreen rounded-lg">
 
             <Image
                 className="rounded-full"
@@ -144,7 +146,7 @@ export default function Home() {
               />
             </button>
 
-            <button className="relative h-8 w-8 hover:bg-gray-100 rounded-lg" onClick={handleChat} type="submit">
+            <button className="relative h-8 w-8 hover:bg-evergreen rounded-lg" onClick={handleChat} type="submit">
               <Image
                 className="rounded-full"
                 src="/send.svg" 
@@ -154,6 +156,16 @@ export default function Home() {
               />
             </button>
         </form>
+    <ToastContainer 
+      position="bottom-center"
+      toastStyle={{
+        backgroundColor: "#00684A",
+        color: "#00ED64"
+      }}
+      autoClose={5000}
+      hideProgressBar={true}
+      newestOnTop={false}
+    />
     </main>
   )
 }

@@ -1,5 +1,6 @@
 import {create} from 'zustand'
 import axios from "axios";
+import { toast } from 'react-toastify';
 
 
 const url = 'http://ec2-3-87-113-31.compute-1.amazonaws.com:8080/text'
@@ -92,7 +93,8 @@ export const useChatStore = create<ChatState>((set) => ({
           }))
     },
     sendMessage: (params:chatApiParams) => {
-        message(params).then(response => {
+       
+        const promise = message(params).then(response => {
             if (response.status!==200){
                 return
             }
@@ -101,11 +103,15 @@ export const useChatStore = create<ChatState>((set) => ({
                 messages: [
                     ...state.messages,
                     {
+                        feedbackId: response.feedbackId,
                         content: response.answer,
                         reverse: true
                     }
                 ]
             }))
+        })
+        toast.promise(promise,{
+            pending: 'Processing...',
         })
     },
     acknowledgeMessage: () => {
