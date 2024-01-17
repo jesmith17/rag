@@ -82,10 +82,8 @@ public class TitanService {
         // Generate embeddings for prompt
         double[] embeddingsArray = this.generateEmbeddings(chatRequest.getPrompt());
 
-        List<Chunk> contextEntries = new ArrayList<>();
         // Lookup context in Mongo based on vector search
-        this.vectorQuery(embeddingsArray, chatRequest);
-
+        List<Chunk> contextEntries = this.vectorQuery(embeddingsArray, chatRequest);
 
         // Pass prompt to LLM to do query
         StringBuilder builder = new StringBuilder();
