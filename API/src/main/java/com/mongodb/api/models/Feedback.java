@@ -91,10 +91,5 @@ public class Feedback {
         this.embeddings = embeddings;
     }
 
-    private class Justification {
-        private boolean complete;
-        private boolean accurate;
-        private boolean easyToUnderstand;
 
-    }
 }
