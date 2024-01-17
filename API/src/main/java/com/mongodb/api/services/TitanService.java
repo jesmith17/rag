@@ -140,5 +140,10 @@ public class TitanService {
     }
 
 
+    private List<Chunk> vectorQuery(double [] embeddings) {
+        return null;
+    }
+
+
 
 }
