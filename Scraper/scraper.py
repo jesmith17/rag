@@ -6,44 +6,45 @@ from langchain_community.embeddings.bedrock import BedrockEmbeddings
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 import PyPDF2
 
-CHUNKS = 1000
-OVERLAP = 100
+CHUNKS = [{"chunks": 100, "overlap": 10}, 
+          {"chunks": 500, "overlap": 50}, 
+          {"chunks": 1000, "overlap": 100}]
 
 
 url = 'mongodb+srv://<username>:<password>@cluster0.bjpsr.mongodb.net/?retryWrites=true&w=majority'
 mongoClient = pymongo.MongoClient(url)
 db = mongoClient['hackathon']
-cname = str(CHUNKS) + "_chunks"
-print(cname)
-collection = db[cname]
 
 bedrock_client = boto3.client(service_name="bedrock-runtime", region_name="us-east-1")
 
 
-def process_chunks(chunk_size, chunk_overlap, text, model_id="amazon.titan-embed-text-v1"):
+def process_chunks(text, model_id="amazon.titan-embed-text-v1"):
 
-    bedrock_embeddings = BedrockEmbeddings(model_id=model_id, client=bedrock_client)
+    for c in CHUNKS:
+        cname = str(c['chunks']) + "_chunks"
+        print(cname)
+        collection = db[cname]
 
-    text_splitter = RecursiveCharacterTextSplitter(
-        chunk_size=chunk_size,
-        chunk_overlap=chunk_overlap,
-    )
-    chunks = text_splitter.split_text(text)
+        bedrock_embeddings = BedrockEmbeddings(model_id=model_id, client=bedrock_client)
 
-    for chunk in chunks:
-        embedding = bedrock_embeddings.embed_query(chunk)
-        payload = {
-            "text": chunk,
-            "embeddings": embedding
-        }
-        collection.insert_one(payload)
+        text_splitter = RecursiveCharacterTextSplitter(
+            chunk_size=c['chunks'],
+            chunk_overlap=c['overlap'],
+        )
+        chunks = text_splitter.split_text(text)
+
+        for chunk in chunks:
+            embedding = bedrock_embeddings.embed_query(chunk)
+            payload = {
+                "text": chunk,
+                "embeddings": embedding
+            }
+            collection.insert_one(payload)
 
 
 def process_pages():
     text = ""
-
-    collection.delete_many({})
-
+    
     file1 = open('docs.txt', 'r')
     lines = file1.readlines()
  
@@ -51,23 +52,27 @@ def process_pages():
 
     for line in lines:
         count += 1
-        print("Line{}: {}".format(count, line.strip()))
+        print("Source{}: {}".format(count, line.strip()))
         url = str(line.strip())
         page = requests.get(url)
         tree = html.fromstring(page.content)
 
-        content = tree.xpath('//p[@class="leafygreen-ui-kkpb6g"]/text()')
+        content1 = tree.xpath('//p[@class="leafygreen-ui-kkpb6g"]/text()')
+        content2 = tree.xpath('//code[@class="leafygreen-ui-3lqzn5"]/text()')
+        content = content1 + content2
         separator = ' '
         text = separator.join(content)
+        text = text.replace('\n', ' ').replace('\r', '')
 
-        process_chunks(CHUNKS, OVERLAP, text, model_id="amazon.titan-embed-text-v1")
+        process_chunks(text, model_id="amazon.titan-embed-text-v1")
 
     return text
 
 
 
-def ask_question(question, model_id):
+def ask_question(question, model_id, collection):
 
+    collection = db[collection]
     bedrock_embeddings = BedrockEmbeddings(model_id=model_id, client=bedrock_client)
 
     embedding = bedrock_embeddings.embed_query(question)
@@ -94,8 +99,12 @@ def ask_question(question, model_id):
 
 def main():
     
+    for c in CHUNKS:
+        cname = str(c['chunks']) + "_chunks"
+        db[cname].delete_many({})
     process_pages()
 
-main()
-    
-ask_question("Can you delete Atlas Search indexes?", model_id="amazon.titan-embed-text-v1")
+# uncomment to ingest data
+# main()
+
+ask_question("What are aggregations?", model_id="amazon.titan-embed-text-v1", collection="500_chunks")
