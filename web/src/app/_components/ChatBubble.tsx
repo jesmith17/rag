@@ -1,6 +1,6 @@
  import React, { useState } from "react"
 import Image from "next/image"
-import useFeedback from "../_utilities/useFeedback"
+import submitFeedback from "../_utilities/useFeedback"
 import { toast } from "react-toastify"
 
 interface ChatBubbleProps {
@@ -30,7 +30,7 @@ const defaultProps:ChatBubbleProps = {
     const [feedbackNotProvided, setFeedbackNotProvided] = useState(true)
 
     const handlePositiveFeedback = (e:any) => {
-        const response = useFeedback(
+        const response = submitFeedback(
             feedbackId,
             { 
             thumbsUp: true,
@@ -47,7 +47,7 @@ const defaultProps:ChatBubbleProps = {
     }
 
     const handleNegativeFeedback = (e:any) => {
-        const response = useFeedback(
+        const response = submitFeedback(
             feedbackId,
             {  
             thumbsUp: false,

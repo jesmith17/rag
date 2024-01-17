@@ -12,7 +12,7 @@ type feedbackParams = {
 type feedbackResponse = {
     message: String
 }
-const useFeedback = async (id:String, feedbackParams:feedbackParams): Promise<feedbackResponse> => {
+const submitFeedback = async (id:String, feedbackParams:feedbackParams): Promise<feedbackResponse> => {
 
     const result = await axios.post(
         `${url}/${id}`,
@@ -26,4 +26,4 @@ const useFeedback = async (id:String, feedbackParams:feedbackParams): Promise<fe
     }
 }
 
-export default useFeedback
+export default submitFeedback

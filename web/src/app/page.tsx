@@ -20,6 +20,7 @@ export default function Home() {
     e.preventDefault()
     if(draftMessage === "") return
     addMessage({
+      feedbackId: '',
       content: draftMessage,
       reverse: false
     })
@@ -82,6 +83,7 @@ export default function Home() {
                       messages.map((message, index )=> {
                         return (
                           <ChatBubble
+                            imgSrc='/chat.svg'
                             feedbackId={message.feedbackId}
                             content={message.content}
                             reverse={message.reverse}
@@ -122,7 +124,18 @@ export default function Home() {
             </div>
           </div>
         }
+        {messages.length == 0 &&
+          <div className="text-spring-green self-end flex flex-col gap-y-16 p-16 text-center w-full text-xl">
+                <h2 className="text-4xl font-bold">Welcome to the Rag Optimizer</h2>
+                <div className="flex flex-col gap-y-4">
+                <span>Anyone can build RAG Applications! </span>
+                
+                <span>The bigger challenge is to generate the best vector embeddings to achieve accuracy of the RAG architecture. </span>
+                <span>RAG Optimizer is a framework that allows developers to optimize the chunking strategy.</span> 
+                </div>
 
+            </div>
+        }
         <form className="flex flex-row w-full p-2 self-end" onSubmit={handleChat}>
             <div className="rounded-full border border-spring-green p-1  px-4 text-left placeholder-spring-green text-slate-blue w-full">
 
@@ -132,7 +145,7 @@ export default function Home() {
                   value={draftMessage}
                   className="w-full focus:outline-none placeholder-forest-green text-spring-green focus:placeholder-forest-green bg-transparent"
                   placeholder="Enter a Prompt Here"
-                  onChange={e => setDraftMessage(e.target.value)}x
+                  onChange={e => setDraftMessage(e.target.value)}
                 />
             </div>
             <button type="button" onClick={handleSettingChange} className="relative h-8 w-8 hover:bg-evergreen rounded-lg">

@@ -17,6 +17,7 @@ type ChatState = {
 }
 
 type ChatMessage = {
+    feedbackId: String
     content: String
     reverse: boolean
 }
