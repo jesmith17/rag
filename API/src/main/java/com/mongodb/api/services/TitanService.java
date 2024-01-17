@@ -1,6 +1,6 @@
 package com.mongodb.api.services;
 
-
+import com.mongodb.api.models.ChatRequest;
 import com.mongodb.api.models.ChatResponse;
 import com.mongodb.api.models.Chunk;
 import org.bson.*;
@@ -71,19 +71,15 @@ public class TitanService {
 
 
 
-    public ChatResponse generateResponse(String prompt, int chunkSize) {
+    public ChatResponse generateResponse(ChatRequest chatRequest) {
 
 
         // Generate embeddings for prompt
-        double[] embeddingsArray = this.generateEmbeddings(prompt);
+        double[] embeddingsArray = this.generateEmbeddings(chatRequest.getPrompt());
 
         List<Chunk> contextEntries = new ArrayList<>();
         // Lookup context in Mongo based on vector search
-        if (chunkSize == 1000) {
-            contextEntries = this.vectorQuery(embeddingsArray, "1000_chunks");
-        } else if (chunkSize == 100) {
-            contextEntries = this.vectorQuery(embeddingsArray, "100_chunks");
-        }
+        this.vectorQuery(embeddingsArray, chatRequest);
 
 
         // Pass prompt to LLM to do query
@@ -97,11 +93,7 @@ public class TitanService {
 
         // Always have these 2, the ones above are for the context found in the DB lookup
         builder.append(" \nBased on the above context, ");
-        builder.append(prompt);
-
-
-
-        System.out.println(builder.toString());
+        builder.append(chatRequest.getPrompt());
 
         JSONObject configObject = new JSONObject()
                 .put("maxTokenCount", 4096)
@@ -134,7 +126,7 @@ public class TitanService {
 
         ChatResponse chatResponse = new ChatResponse();
         chatResponse.setAnswer(completion);
-        chatResponse.setPrompt(prompt);
+        chatResponse.setPrompt(chatRequest.getPrompt());
         chatResponse.setLlmInput(builder.toString());
 
         return chatResponse;
@@ -143,7 +135,23 @@ public class TitanService {
     }
 
 
-    private List<Chunk> vectorQuery(double[] embeddings, String collectionName) {
+    private List<Chunk> vectorQuery(double[] embeddings, ChatRequest chatRequest) {
+
+        String collectionName = null;
+        switch (chatRequest.getChunkSize()){
+            case 1000:
+                collectionName = "1000_chunks";
+                break;
+            case 500:
+                collectionName = "500_chunks";
+                break;
+            case 100:
+                collectionName = "100_chunks";
+                break;
+            default:
+                collectionName = "100_chunks";
+        }
+
         BsonDocument searchQuery = new BsonDocument();
         BsonArray embeddingsArray = new BsonArray();
         for(double vector: embeddings){
@@ -151,9 +159,9 @@ public class TitanService {
         }
         searchQuery.append("queryVector", embeddingsArray);
         searchQuery.append("path",new BsonString("embeddings"));
-        searchQuery.append("numCandidates", new BsonInt32(200));
+        searchQuery.append("numCandidates", new BsonInt32(chatRequest.getNumCandidates()));
         searchQuery.append("index", new BsonString("vector_index"));
-        searchQuery.append("limit", new BsonInt32(10));
+        searchQuery.append("limit", new BsonInt32(chatRequest.getLimit()));
 
 
         Aggregation agg = newAggregation(

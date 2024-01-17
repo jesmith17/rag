@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
 @RestController
-@RequestMapping(value="text", consumes = "*/*", produces = MediaType.APPLICATION_JSON_VALUE)
+@RequestMapping(value="text", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 public class TextController {
 
 
@@ -24,7 +24,7 @@ public class TextController {
     private ChatResponse getText(@RequestBody ChatRequest request){
 
 
-        return service.generateResponse(request.getPrompt(), request.getChunkSize());
+        return service.generateResponse(request);
     }
 
 }
