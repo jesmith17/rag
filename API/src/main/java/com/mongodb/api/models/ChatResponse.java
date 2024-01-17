@@ -7,6 +7,8 @@ public class ChatResponse {
 
     public String llmInput;
 
+    public String feedbackId;
+
 
     public String getPrompt() {
         return prompt;
@@ -30,5 +32,13 @@ public class ChatResponse {
 
     public void setLlmInput(String llmInput) {
         this.llmInput = llmInput;
+    }
+
+    public String getFeedbackId() {
+        return feedbackId;
+    }
+
+    public void setFeedbackId(String feedbackId) {
+        this.feedbackId = feedbackId;
     }
 }

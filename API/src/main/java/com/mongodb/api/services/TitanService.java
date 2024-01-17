@@ -3,6 +3,8 @@ package com.mongodb.api.services;
 import com.mongodb.api.models.ChatRequest;
 import com.mongodb.api.models.ChatResponse;
 import com.mongodb.api.models.Chunk;
+import com.mongodb.api.models.Feedback;
+import com.mongodb.api.repository.FeedbackRepository;
 import org.bson.*;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -31,6 +33,9 @@ public class TitanService {
 
     @Autowired
     private MongoTemplate template;
+
+    @Autowired
+    private FeedbackRepository feedbackRepo;
 
     public TitanService(){
         runtime = BedrockRuntimeClient.builder()
@@ -129,6 +134,16 @@ public class TitanService {
         chatResponse.setPrompt(chatRequest.getPrompt());
         chatResponse.setLlmInput(builder.toString());
 
+        // Create feedback stub
+        Feedback feedback = new Feedback();
+        feedback.setAnswer(chatResponse.getAnswer());
+        feedback.setPrompt(chatResponse.getPrompt());
+        feedback.setEmbeddings(embeddingsArray);
+        feedback.setChunkSize(chatRequest.getChunkSize());
+        feedback.setLlmInput(chatResponse.getLlmInput());
+        Feedback saved = feedbackRepo.save(feedback);
+
+        chatResponse.setFeedbackId(saved.getId());
         return chatResponse;
         
 
