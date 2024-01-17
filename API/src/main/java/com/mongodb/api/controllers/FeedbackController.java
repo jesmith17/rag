@@ -20,8 +20,8 @@ public class FeedbackController {
     FeedbackRepository feedbackRepository;
 
     @PostMapping("/{id}")
-    public Feedback updateFeedback(@RequestBody Feedback feedback) {
-        Feedback savedFeedback = feedbackRepository.findById(feedback.getId()).get();
+    public Feedback updateFeedback(@RequestBody Feedback feedback,@PathVariable("id") String id ) {
+        Feedback savedFeedback = feedbackRepository.findById(id).get();
         savedFeedback.setThumbsUp(feedback.isThumbsUp());
         savedFeedback.setJustification(feedback.getJustification());
         return feedbackRepository.save(savedFeedback);
