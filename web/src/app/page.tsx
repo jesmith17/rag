@@ -1,59 +1,159 @@
+"use client";
+
 import Image from 'next/image'
 import ChatBubble from './_components/ChatBubble'
+import { useChatStore } from './_store/chatStore'
+import { useSettingStore} from './_store/settingStore'
 
+import {  useState } from 'react'
 
 export default function Home() {
+
+  const { messages, processing, addMessage, sendMessage, settings, changeSetting } = useChatStore()
+
+  const [draftMessage, setDraftMessage] = useState("")
+
+  const {isShown, toggleState}  = useSettingStore()
+
+  const handleChat = (e:any) => {
+    e.preventDefault()
+    if(draftMessage === "") return
+    addMessage({
+      content: draftMessage,
+      reverse: false
+    })
+
+    sendMessage({
+      prompt: draftMessage,
+      settings: settings
+    })
+
+    setDraftMessage("")
+    
+  }
+
+  const handleChunkChange = (e:any) => {
+    changeSetting({
+      ...settings,
+      chunkSize: e.target.value
+    })
+  }
+
+  const handleNumChange = (e:any) => {
+    changeSetting({
+      ...settings,
+      numCandidates: e.target.value
+    })
+  }
+
+  const handleLimitChange = (e:any) => {
+    changeSetting({
+      ...settings,
+      limit: e.target.value
+    })
+  }
+
+  const handleSimilarityChange = (e:any) => {
+
+    changeSetting({
+      ...settings,
+      similarity: e.target.value
+    })
+  }
+
+  const handleSettingChange = (e:any) => {
+    toggleState()
+  }
+
   return (
-    <main className="h-screen  items-center justify-between p-4 flex flex-col text-slate-blue bg-evergreen">
-      <div className="w-full flex flex-row items-center pb-8 ">
+    <main className="min-h-dvh  p-2 lg:p-4 flex flex-col text-slate-blue bg-slate-blue">
+      <div className="w-full flex flex-row start pb-8 ">
         <img 
           className="w-64"
           src="/mongo-spring-green.png" 
         />
-        <div className="px-2 self-end text-spring-green">North Hackathon</div>
+        <div className="lg:px-2 self-end text-spring-green">North Hackathon</div>
       </div>
-      <div className="flex flex-row  justify-between w-full h-full">
-      <aside id="sidebar" className="flex flex-col w-2/5 overflow-y-auto h-full justify-top text-spring-green" aria-label='sidebar'>
-        <div className="h-full px-3 py-4 overflow-y-auto ">
-            <ul className="space-y-2 font-medium">
-              <li className="hover:bg-forest-green cursor-pointer p-2">Chat 1</li>
-              <li className="hover:bg-forest-green cursor-pointer p-2">Chat 2</li>
-            </ul>
+      <div className="min-h-full flex-1 self-start flex flex-col justify-between w-full  p-2 items-center  p-2 rounded-md   rounded-md ">
+            <div id="chat" className="w-full pb-4">
+              <ul className="space-y-4" >
+                  {messages.length > 0 &&
+                      messages.map((message, index )=> {
+                        return (
+                          <ChatBubble
+                            content={message.content}
+                            reverse={message.reverse}
+                            key={`message-${index}`}
+                          />
+                        )
+                    })
+
+                    }
+              </ul>
+              <div id="chat-anchor"></div>
+            </div>
+
+
+
         </div>
-      </aside>
-      <div className="w-full px-2 flex flex-col justify-between h-full">
-        <div className="p-2 rounded-lg bg-white shadow-xl h-full flex flex-col shadow-xl border border-slate-blue ">
-          <div className="h-full">
-            <ul className="space-y-4">
-                <ChatBubble />
-                <ChatBubble />
-            </ul>
+        {isShown &&
+          <div className="text-spring-green w-full bg-evergreen flex flex-row justify-between p-4">
+            <div className="flex flex-col h-11 w-full px-3">
+              <label className="">Chunk Size:</label>
+              <input onChange={handleChunkChange} type="text" className="border bg-transparent  outline outline-0 border-0 border-b border-spring-green" placeholder={`${settings.chunkSize}`} />
+            </div>
+            <div className="flex flex-col h-11 w-full px-3">
+              <label>NumOfCandidates:</label>
+              <input onChange={handleNumChange} type="text"  className="border bg-transparent  outline outline-0 border-0 border-b border-spring-green" placeholder={`${settings.numCandidates}`} />
+            </div>
+            <div className="flex flex-col h-11 w-full px-3">
+              <label>Limit:</label>
+              <input onChange={handleLimitChange} type="text" className="border bg-transparent  outline outline-0 border-0 border-b border-spring-green" placeholder={`${settings.limit}`} />
+            </div>
+            <div className="flex flex-col h-11 w-full px-3">
+              <label>Similarity:</label>
+              <select onChange={handleSimilarityChange} className="bg-transparent" name="similarity" id="sim">
+                <option value="euclidean" selected={settings.similarity === 'euclidean'? true: false}>Euclidean</option>
+                <option value="cosine" selected={settings.similarity === 'cosine'? true: false}>Cosine</option>
+                <option value="dotproduct" selected={settings.similarity === 'dotproduct'? true: false}>Dotproduct</option>
+              </select>
+            </div>
           </div>
-          <div className="flex flex-row">
-          <div className="rounded-full border border-gray-500 p-1  px-4 text-left placeholder-gray-600 text-slate-blue w-full">
-              <input 
-                type="text"
-                className="w-full focus:outline-none focus:placeholder-gray-400"
-                placeholder="Enter a Prompt Here"
-              />
-          </div>
-          <button className="relative h-8 w-8 hover:bg-gray-100 rounded-lg">
+        }
+
+        <form className="flex flex-row w-full p-2 self-end" onSubmit={handleChat}>
+            <div className="rounded-full border border-spring-green p-1  px-4 text-left placeholder-spring-green text-slate-blue w-full">
+
+                <input 
+                  type="text"
+                  disabled={processing}
+                  value={draftMessage}
+                  className="w-full focus:outline-none placeholder-forest-green text-spring-green focus:placeholder-forest-green bg-transparent"
+                  placeholder="Enter a Prompt Here"
+                  onChange={e => setDraftMessage(e.target.value)}x
+                />
+            </div>
+            <button type="button" onClick={handleSettingChange} className="relative h-8 w-8 hover:bg-gray-100 rounded-lg">
+
             <Image
-              className="rounded-full"
-              src="/send.svg" 
-              alt={'Enter'}
-              fill={true}
+                className="rounded-full"
+                src="/settings.svg" 
+                alt={'Settings'}
+                fill={true}
 
-            />
-          </button>
+              />
+            </button>
 
-          </div>
+            <button className="relative h-8 w-8 hover:bg-gray-100 rounded-lg" onClick={handleChat} type="submit">
+              <Image
+                className="rounded-full"
+                src="/send.svg" 
+                alt={'Enter'}
+                fill={true}
 
-        </div>
-
-      </div>
-      </div>
-
+              />
+            </button>
+        </form>
     </main>
   )
 }
@@ -61,3 +161,17 @@ export default function Home() {
 //"top-0 left-0 w-64 h-screen transition-transform -translate-x-full sm:translate-x-0"
 
 //flex flex-row justify-between bg-white
+
+{/* <aside id="sidebar" className="flex flex-col w-2/5 overflow-y-auto h-full justify-top text-spring-green" aria-label='sidebar'>
+<div className="h-full px-3 py-4 overflow-y-auto ">
+    <ul className="space-y-2 font-medium">
+      <li className="hover:bg-forest-green cursor-pointer p-2">Chat 1</li>
+      <li className="hover:bg-forest-green cursor-pointer p-2">Chat 2</li>
+    </ul>
+</div>
+</aside> */}
+
+{/* <div className="w-full lg:px-2 flex flex-col justify-between  items-center max-h-dvh ">
+<div className="w-full  flex flex-col overflow-auto">
+</div>
+      </div> */}

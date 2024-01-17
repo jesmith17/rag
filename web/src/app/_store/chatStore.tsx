@@ -1,0 +1,123 @@
+import {create} from 'zustand'
+import axios from "axios";
+
+
+const url = 'http://ec2-3-87-113-31.compute-1.amazonaws.com:8080/text'
+
+type ChatState = {
+    messages: ChatMessage[]
+    responseMessage: String
+    processing: boolean,
+    settings: RAGSettings,
+    addMessage: (message:ChatMessage) => void
+    sendMessage: (message:chatApiParams) => void
+    acknowledgeMessage: () => void
+    changeSetting: (settings:RAGSettings) => void
+}
+
+type ChatMessage = {
+    content: String
+    reverse: boolean
+}
+
+type RAGSettings = {
+    chunkSize: number
+    numCandidates: number
+    limit: number
+    similarity: "euclidean" | "cosine" | "dotproduct"
+}
+
+type chatApiParams = {
+    prompt : String
+    settings: RAGSettings
+}
+
+type chatResponse = {
+    status: Number
+    prompt: String
+    answer: String
+    llmInput: String
+    feedbackId: String
+}
+
+const defaults = {
+    chunkSize: 1000,
+    numCandidates: 100,
+    limit: 10,
+    similarity: 'euclidean'
+}
+
+const message = async (reqBodyParams:chatApiParams): Promise<chatResponse> => {
+
+
+    console.log(reqBodyParams)
+    const result = await axios.post(
+        url,
+       {
+            prompt: reqBodyParams.prompt,
+            chunkSize: reqBodyParams.settings.chunkSize,
+            numCandidates: reqBodyParams.settings.numCandidates,
+            limit: reqBodyParams.settings.limit,
+            similarity: reqBodyParams.settings.similarity
+
+        }
+    )
+
+    return {
+        status: result.status,
+        prompt: result.data.prompt,
+        answer: result.data.answer,
+        llmInput: result.data.llmInput,
+        feedbackId: result.data.feedbackId
+    }
+}
+
+export const useChatStore = create<ChatState>((set) => ({
+    messages: [],
+    processing: false,
+    responseMessage: '',
+    settings: {
+        chunkSize: 1000,
+        numCandidates: 100,
+        limit: 10,
+        similarity: 'euclidean'
+    },
+    addMessage: (message:ChatMessage) => {
+        set((state) => ({
+            messages: [
+                ...state.messages,
+                message
+            ],
+            processing: true
+          }))
+    },
+    sendMessage: (params:chatApiParams) => {
+        message(params).then(response => {
+            if (response.status!==200){
+                return
+            }
+            set((state) => ({
+                processing: false,
+                messages: [
+                    ...state.messages,
+                    {
+                        content: response.answer,
+                        reverse: true
+                    }
+                ]
+            }))
+        })
+    },
+    acknowledgeMessage: () => {
+        set((state) => ({
+            processing: false
+        }))
+    },
+    changeSetting: (settings:RAGSettings) => {
+        set((state) => ({
+            settings: settings
+        }))
+    }
+}))
+
+export {}
