@@ -88,10 +88,14 @@ public class TitanService {
         // Pass prompt to LLM to do query
         StringBuilder builder = new StringBuilder();
 
+        int count = 0;
         for(Chunk chunk: contextEntries) {
-            if ((builder.length() + chunk.getText().length()) <= 3900) {
-                builder.append(chunk.getText());
+            if (chatRequest.getChunkSize() * count > 3500){
+                break;
             }
+            builder.append(chunk.getText());
+            count++;
+
         }
 
         // Always have these 2, the ones above are for the context found in the DB lookup
@@ -99,9 +103,9 @@ public class TitanService {
         builder.append(chatRequest.getPrompt());
 
         JSONObject configObject = new JSONObject()
-                .put("maxTokenCount", 4096)
+                .put("maxTokenCount", 4096  )
                 .put("stopSequences", new JSONArray())
-                .put("temperature", 0)
+                .put("temperature", 1)
                 .put("topP", 1);
 
         JSONObject jsonBody = new JSONObject()
