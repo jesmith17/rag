@@ -1,6 +1,6 @@
 import axios from "axios"
 
-const url = 'http://ec2-3-87-113-31.compute-1.amazonaws.com:8080/feedback'
+const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/feedback`
 
 type feedbackParams = {
     thumbsUp: boolean

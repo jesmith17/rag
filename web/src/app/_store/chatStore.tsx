@@ -3,7 +3,7 @@ import axios from "axios";
 import { toast } from 'react-toastify';
 
 
-const url = 'http://ec2-3-87-113-31.compute-1.amazonaws.com:8080/text'
+const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/text`
 
 type ChatState = {
     messages: ChatMessage[]
