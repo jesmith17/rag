@@ -7,7 +7,7 @@ const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
   title: 'Rag Optimizer',
-  description: 'RAG MongoD',
+  description: 'For use with RAG Architectures to test and validate various configurations and see which changes take effect',
 }
 
 export default function RootLayout({

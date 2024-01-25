@@ -7,13 +7,14 @@
 
 ![](https://webimages.mongodb.com/_com_assets/cms/kuyjf3vea2hg34taa-horizontal_default_slate_blue.svg?auto=format%252Ccompress)
 
-  
-  
+
+## Requirements
+  - **Minimum Node Version 16.14.0**. Can use something like [NVM](https://github.com/nvm-sh/nvm) if concerned about upgrading.
 
 ### Run the App
 ```shell
-npm  install
-npm  run  dev
+npm install
+npm run dev
 ```
 
 ### Configuring the App
