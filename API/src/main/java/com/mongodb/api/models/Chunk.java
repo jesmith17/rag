@@ -1,15 +1,35 @@
 package com.mongodb.api.models;
 
-public interface Chunk {
+import org.springframework.data.annotation.Id;
 
+public class Chunk {
 
-    public void setId(String id);
+    @Id
+    private String id;
+    private String text;
+    private double[] embeddings;
 
-    public String getText();
+    public String getId() {
+        return id;
+    }
 
-    public void setText(String text);
+    public void setId(String id) {
+        this.id = id;
+    }
 
-    public double[] getEmbeddings();
+    public String getText() {
+        return text;
+    }
 
-    public void setEmbeddings(double[] embeddings);
+    public void setText(String text) {
+        this.text = text;
+    }
+
+    public double[] getEmbeddings() {
+        return embeddings;
+    }
+
+    public void setEmbeddings(double[] embeddings) {
+        this.embeddings = embeddings;
+    }
 }
