@@ -67,9 +67,6 @@ export default function Home() {
     toggleState()
   }
 
-  console.log(process.env.NODE_ENV)
-  console.log(process.env.NEXT_PUBLIC_API_BASE_URL)
-  console.log(process.env)
 
   return (
     <main className="min-h-dvh  p-2 lg:p-4 flex flex-col text-slate-blue bg-slate-blue">
