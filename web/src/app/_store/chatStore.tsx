@@ -51,9 +51,6 @@ const defaults = {
 }
 
 const message = async (reqBodyParams:chatApiParams): Promise<chatResponse> => {
-
-
-    console.log(reqBodyParams)
     const result = await axios.post(
         url,
        {
@@ -95,7 +92,6 @@ export const useChatStore = create<ChatState>((set) => ({
           }))
     },
     sendMessage: (params:chatApiParams) => {
-       
         const promise = message(params).then(response => {
             if (response.status!==200){
                 return
@@ -112,8 +108,15 @@ export const useChatStore = create<ChatState>((set) => ({
                 ]
             }))
         })
+
         toast.promise(promise,{
             pending: 'Processing...',
+            error: {
+                render({data}:any){
+                  // When the promise reject, data will contains the error
+                  return `${data.code}: ${data.message}`
+                }
+              }
         })
     },
     acknowledgeMessage: () => {
